@@ -2,7 +2,7 @@
 
 Only listing significant user-visible, not internal code cleanups and minor bug fixes.
 
-## 0.2.0 (upcoming)
+## 0.2.0 (23 June 2016)
 
 * Ignored scenarios will fail if ignore cause was an already done jira ticket
 * No more a submodule project
