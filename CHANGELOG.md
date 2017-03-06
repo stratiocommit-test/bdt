@@ -2,7 +2,7 @@
 
 Only listing significant user-visible, not internal code cleanups and minor bug fixes.
 
-## 0.4.0 (upcoming)
+## 0.4.0 (March 06, 2017)
 
 * [QA-272] better classes packaging
 * [QA-298] Apache2 license. Step definitions redefined
