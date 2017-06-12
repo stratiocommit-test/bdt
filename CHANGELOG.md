@@ -2,7 +2,7 @@
 
 Only listing significant user-visible, not internal code cleanups and minor bug fixes.
 
-## 0.5.0 (upcoming)
+## 0.5.0 (June 12, 2017)
 
 * [QA-342] New cucumber tag @loop to multiple scenario executions
 
