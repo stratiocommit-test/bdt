@@ -1,4 +1,4 @@
-@Library('libpipelines@feature/gradle') _
+@Library('libpipelines@master') _
 
 hose {
     EMAIL = 'qa'
@@ -52,7 +52,7 @@ hose {
 		 'SELENIUM_GRID=selenium.cd','ID=%%JUID']]],
         ['UBUNTU': [
            'image': 'stratio/ubuntu-base:16.04',
-           'ssh': true]],
+           'cmd': '/usr/sbin/sshd -D -e']],
     ]
     
     ITPARAMETERS = """
