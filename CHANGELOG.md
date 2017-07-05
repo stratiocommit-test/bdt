@@ -2,7 +2,7 @@
 
 Only listing significant user-visible, not internal code cleanups and minor bug fixes.
 
-## 0.5.1 (upcoming)
+## 0.5.1 (July 05, 2017)
 
 * [QATM-78] Fix public releasing in maven central
 
