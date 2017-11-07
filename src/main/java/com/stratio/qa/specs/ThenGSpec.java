@@ -32,12 +32,14 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Fail;
 import org.assertj.core.api.WritableAssertionInfo;
 import org.json.JSONArray;
+import org.ldaptive.LdapAttribute;
 import org.openqa.selenium.WebElement;
 
 import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.stratio.qa.assertions.Assertions.assertThat;
+import static org.testng.AssertJUnit.fail;
 
 /**
  * Generic Then Specs.
@@ -788,5 +790,21 @@ public class ThenGSpec extends BaseGSpec {
         ThreadProperty.set(envVar, text);
     }
 
+    /**
+     * Checks if the previous LDAP search contained a single Entry with a specific attribute and an expected value
+     *
+     * @param attributeName The name of the attribute to look for in the LdapEntry
+     * @param expectedValue The expected value of the attribute
+     */
+    @Then("^the LDAP entry contains the attribute '(.+?)' with the value '(.+?)'$")
+    public void ldapEntryContains(String attributeName, String expectedValue) {
+        if (this.commonspec.getPreviousLdapResults().isPresent()) {
+            Assertions.assertThat(this.commonspec.getPreviousLdapResults().get().getEntry().getAttribute(attributeName).getStringValue()).isEqualTo(expectedValue);
+        } else {
+            fail("No previous LDAP results were stored in memory");
+        }
+
+
+    }
 }
 
