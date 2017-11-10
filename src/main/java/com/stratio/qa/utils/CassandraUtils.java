@@ -38,7 +38,7 @@ public class CassandraUtils {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(CassandraUtils.class);
 
-    private final String host;
+    private String host;
 
     private Cluster cluster;
 
@@ -55,6 +55,13 @@ public class CassandraUtils {
         this.host = System.getProperty("CASSANDRA_HOST", "127.0.0.1");
     }
 
+
+    /**
+     * Set Cassandra host
+     */
+    public void setHost(String hostname) {
+        this.host = hostname;
+    }
 
     /**
      * Connect to Cassandra host.
@@ -138,7 +145,6 @@ public class CassandraUtils {
         this.cluster = Cluster.builder().addContactPoint(this.host).build();
         this.cluster.getConfiguration().getQueryOptions()
                 .setConsistencyLevel(ConsistencyLevel.ONE);
-
     }
 
     /**
