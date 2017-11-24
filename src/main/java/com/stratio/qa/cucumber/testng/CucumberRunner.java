@@ -37,7 +37,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-
 public class CucumberRunner {
 
     private final cucumber.runtime.Runtime runtime;
@@ -114,6 +113,7 @@ public class CucumberRunner {
         uniqueGlue.add("classpath:com/stratio/paas/dcoselasticserviceAT/specs");
         uniqueGlue.add("classpath:com/stratio/paas/cassandraframeworkAT/specs");
         uniqueGlue.add("classpath:com/stratio/paas/hdfsframeworkAT/specs");
+        uniqueGlue.add("classpath:com/stratio/paas/dgDatadictionaryAT/specs");
         runtimeOptions.getGlue().clear();
         runtimeOptions.getGlue().addAll(uniqueGlue);
 
