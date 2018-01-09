@@ -1,4 +1,4 @@
-@Library('libpipelines@master') _
+@Library('libpipelines@fix/remove-volumes') _
 
 hose {
     EMAIL = 'qa'
