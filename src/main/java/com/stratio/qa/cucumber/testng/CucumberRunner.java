@@ -92,6 +92,7 @@ public class CucumberRunner {
         uniqueGlue.add("classpath:com/stratio/sparta/testsAT/specs");
         uniqueGlue.add("classpath:com/stratio/gosecsso/testsAT/specs");
         uniqueGlue.add("classpath:com/stratio/dcos/crossdata/testsAT/specs");
+        uniqueGlue.add("classpath:com/stratio/cct/configuration/api/specs");
         uniqueGlue.add("classpath:com/stratio/crossdata/testsAT/specs");
         uniqueGlue.add("classpath:com/stratio/streaming/testsAT/specs");
         uniqueGlue.add("classpath:com/stratio/ingestion/testsAT/specs");
@@ -116,6 +117,7 @@ public class CucumberRunner {
         uniqueGlue.add("classpath:com/stratio/hdfs/specs");
         uniqueGlue.add("classpath:com/stratio/cassandra/specs");
         uniqueGlue.add("classpath:com/stratio/schema_registry/specs");
+
         runtimeOptions.getGlue().clear();
         runtimeOptions.getGlue().addAll(uniqueGlue);
 
