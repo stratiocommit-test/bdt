@@ -522,20 +522,20 @@ public class GivenGSpec extends BaseGSpec {
      * @throws Exception exception
      *
      */
-    @Given("^I open a ssh connection to '(.+?)' with user '(.+?)'( and password '(.+?)')?( using pem file '(.+?)')?$")
-    public void openSSHConnection(String remoteHost, String user, String foo, String password, String bar, String pemFile) throws Exception {
+    @Given("^I open a ssh connection to '(.+?)'( in port '(.+?)')? with user '(.+?)'( and password '(.+?)')?( using pem file '(.+?)')?$")
+    public void openSSHConnection(String remoteHost, String tmp, String remotePort, String user, String foo, String password, String bar, String pemFile) throws Exception {
         if ((pemFile == null) || (pemFile.equals("none"))) {
             if (password == null) {
                 throw new Exception("You have to provide a password or a pem file to be used for connection");
             }
-            commonspec.setRemoteSSHConnection(new RemoteSSHConnection(user, password, remoteHost, null));
+            commonspec.setRemoteSSHConnection(new RemoteSSHConnection(user, password, remoteHost, remotePort, null));
             commonspec.getLogger().debug("Opening ssh connection with password: { " + password + "}", commonspec.getRemoteSSHConnection());
         } else {
             File pem = new File(pemFile);
             if (!pem.exists()) {
                 throw new Exception("Pem file: " + pemFile + " does not exist");
             }
-            commonspec.setRemoteSSHConnection(new RemoteSSHConnection(user, null, remoteHost, pemFile));
+            commonspec.setRemoteSSHConnection(new RemoteSSHConnection(user, null, remoteHost, remotePort, pemFile));
             commonspec.getLogger().debug("Opening ssh connection with pemFile: {}", commonspec.getRemoteSSHConnection());
         }
     }
