@@ -593,6 +593,22 @@ public class GivenGSpec extends BaseGSpec {
         commonspec.setCookies(cookiesAtributes);
     }
 
+    /**
+     * Generate token to authenticate in gosec SSO
+     * @param isSecure check if you want to obtain the gosecSSO token
+     * @param ssoHost current sso host
+     * @param userName username
+     * @param passWord password
+     * @throws Exception exception
+     */
+    @Given("^I securize rest calls '(.*?)'( using host '(.*?)' with user '(.*?)' and password '(.*?)')?$")
+    public void setGosecSSOCockieOptional(String isSecure, String foo, String ssoHost, String userName, String passWord) throws Exception {
+        Boolean isSecureBool = Boolean.valueOf(isSecure);
+        if (isSecureBool) {
+            setGoSecSSOCookie(ssoHost, userName, passWord);
+        }
+    }
+
     public List<Cookie> addSsoToken(HashMap<String, String> ssoCookies, String[] tokenList) {
         List<Cookie> cookiesAttributes = new ArrayList<>();
 
