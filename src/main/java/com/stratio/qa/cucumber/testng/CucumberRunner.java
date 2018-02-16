@@ -115,6 +115,8 @@ public class CucumberRunner {
         uniqueGlue.add("classpath:com/stratio/paas/hdfsframeworkAT/specs");
         uniqueGlue.add("classpath:com/stratio/paas/dgDatadictionaryAT/specs");
         uniqueGlue.add("classpath:com/stratio/paas/kafkaschemaregistryAT/specs");
+        uniqueGlue.add("classpath:com/stratio/postgresql/testsAT/specs");
+
         runtimeOptions.getGlue().clear();
         runtimeOptions.getGlue().addAll(uniqueGlue);
 
