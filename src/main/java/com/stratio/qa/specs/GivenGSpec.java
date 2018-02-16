@@ -244,7 +244,7 @@ public class GivenGSpec extends BaseGSpec {
 
         String value = commonspec.getJSONPathString(json, parsedElement, position);
 
-        ThreadProperty.set(envVar, value);
+        ThreadProperty.set(envVar, value.replaceAll("\n", ""));
     }
 
 
