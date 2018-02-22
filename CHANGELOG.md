@@ -6,7 +6,7 @@ Only listing significant user-visible, not internal code cleanups and minor bug 
 
 * Pending changelog
 
-## 0.6.0 (upcoming)
+## 0.6.0 (February 22, 2018)
 
 * [QATM-236] Quit after tagged scenario fails
 * [QATM-70] New background tag
