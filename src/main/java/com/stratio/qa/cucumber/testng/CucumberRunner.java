@@ -118,6 +118,7 @@ public class CucumberRunner {
         uniqueGlue.add("classpath:com/stratio/hdfs/specs");
         uniqueGlue.add("classpath:com/stratio/cassandra/specs");
         uniqueGlue.add("classpath:com/stratio/schema_registry/specs");
+        uniqueGlue.add("classpath:com/stratio/rest_proxyy/specs");
         uniqueGlue.add("classpath:com/stratio/spark/tests/specs");
         uniqueGlue.add("classpath:com/stratio/schema/discovery/specs");
 
