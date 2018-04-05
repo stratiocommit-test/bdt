@@ -4,7 +4,7 @@ Only listing significant user-visible, not internal code cleanups and minor bug 
 
 ## 0.8.0 (upcoming)
 
-* Pending changelog
+* [QATM-967] Updated Selenium version to 3.9.1
 
 ## 0.7.0 (upcoming)
 

@@ -56,20 +56,22 @@ hose {
                   'LDAP_ADMIN_PASSWORD=stratio'],
             'sleep': 30,
             'healthcheck': 389]],
-	['CHROME': [
-	   'image': 'stratio/selenium-chrome:48',
-           'volumes': [
-		 '/dev/shm:/dev/shm'],
-           'env': [
-		 'SELENIUM_GRID=selenium.cd','ID=%%JUID']]],
+	    ['CHROME': [
+	        'image': 'selenium/node-chrome-debug:3.9.1',
+            'volumes': [
+		    '/dev/shm:/dev/shm'],
+            'env': [
+		        'HUB_HOST=selenium391.cd',
+                'HUB_PORT=4444',
+                'SE_OPTS="-browser browserName=chrome,version=64%%JUID "']]],
         ['UBUNTU': [
            'image': 'stratio/ubuntu-base:16.04',
            'cmd': '/usr/sbin/sshd -D -e']],
     ]
     
     ITPARAMETERS = """
-	| -DSELENIUM_GRID=selenium.cd:4444 
-	| -DFORCE_BROWSER=chrome_48%%JUID
+	| -DSELENIUM_GRID=selenium391.cd:4444 
+	| -DFORCE_BROWSER=chrome_64%%JUID
         | -DMONGO_HOST=%%MONGODB
         | -DCASSANDRA_HOST=%%CASSANDRA#0
         | -DES_NODE=%%ELASTICSEARCH#0

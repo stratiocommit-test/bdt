@@ -35,11 +35,9 @@ import com.ning.http.client.cookie.Cookie;
 import com.stratio.qa.conditions.Conditions;
 import com.stratio.qa.utils.*;
 import cucumber.api.DataTable;
-import org.apache.commons.collections.IteratorUtils;
-import org.apache.commons.io.FileUtils;
+
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
-import org.hjson.JsonArray;
 import org.hjson.JsonObject;
 import org.hjson.JsonType;
 import org.hjson.JsonValue;
@@ -48,11 +46,13 @@ import org.json.JSONObject;
 import org.ldaptive.SearchResult;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.internal.Locatable;
+import org.openqa.selenium.interactions.internal.Locatable;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.collections.IteratorUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -449,9 +449,7 @@ public class CommonG {
                 File fout = new File(outputFile);
                 boolean dirs = fout.getParentFile().mkdirs();
 
-                FileOutputStream fos;
-                try {
-                    fos = new FileOutputStream(fout, true);
+                try (FileOutputStream fos = new FileOutputStream(fout, true)) {
                     Writer out = new OutputStreamWriter(fos, "UTF8");
                     PrintWriter writer = new PrintWriter(out, false);
                     writer.append(source);

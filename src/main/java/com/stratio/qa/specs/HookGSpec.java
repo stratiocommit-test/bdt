@@ -21,11 +21,11 @@ import com.ning.http.client.AsyncHttpClientConfig;
 import com.stratio.qa.exceptions.SuppressableException;
 import com.stratio.qa.utils.CukesGHooks;
 import com.stratio.qa.utils.ThreadProperty;
-import com.thoughtworks.selenium.SeleniumException;
 import cucumber.api.Scenario;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CommandInfo;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -124,7 +124,6 @@ public class HookGSpec extends BaseGSpec {
             fail("Selenium grid not available");
         }
         String b = ThreadProperty.get("browser");
-
         if ("".equals(b)) {
             fail("Non available browsers");
         }
@@ -166,7 +165,7 @@ public class HookGSpec extends BaseGSpec {
                 break;
             default:
                 commonspec.getLogger().error("Unknown browser: " + browser);
-                throw new SeleniumException("Unknown browser: " + browser);
+                throw new WebDriverException("Unknown browser: " + browser);
         }
 
         capabilities.setVersion(version);
@@ -184,6 +183,7 @@ public class HookGSpec extends BaseGSpec {
             commonspec.getDriver().manage().window().setSize(new Dimension(1440, 900));
         }
         commonspec.getDriver().manage().window().maximize();
+
 
     }
 
