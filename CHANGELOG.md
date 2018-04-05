@@ -6,7 +6,7 @@ Only listing significant user-visible, not internal code cleanups and minor bug 
 
 * [QATM-967] Updated Selenium version to 3.9.1
 
-## 0.7.0 (upcoming)
+## 0.7.0 (April 05, 2018)
 
 * [CROSSDATA-1550] Add @multiloop tag
 * [QATM-1061] Add step to send requests to endpoint with timeout and datatable
