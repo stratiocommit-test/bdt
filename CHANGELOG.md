@@ -2,6 +2,10 @@
 
 Only listing significant user-visible, not internal code cleanups and minor bug fixes.
 
+## 0.8.0 (upcoming)
+
+* Pending changelog
+
 ## 0.7.0 (upcoming)
 
 * [CROSSDATA-1550] Add @multiloop tag
