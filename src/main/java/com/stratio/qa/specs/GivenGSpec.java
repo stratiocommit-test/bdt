@@ -26,6 +26,8 @@ import com.stratio.qa.utils.ThreadProperty;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.Given;
 import org.assertj.core.api.Assertions;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.openqa.selenium.WebElement;
 
 import java.io.File;
@@ -847,6 +849,88 @@ public class GivenGSpec extends BaseGSpec {
         } else {
             commonspec.getLogger().info("Success! Response value not found after " + timeout + " seconds");
         }
+    }
+
+    /**
+     * Check if all task of a service are correctly distributed in all datacenters of the cluster
+     *
+     * @param serviceList all task deployed in the cluster separated by a semicolumn.
+     * @throws Exception
+     *
+     */
+    @Given("^services '(.*?)' are splitted correctly in datacenters$")
+    public void checkServicesDistributionMultiDataCenter(String serviceList) throws Exception {
+        executeCommand("dcos node --json >> aux.txt", "foo", 0, "bar", null);
+        executeCommand("cat aux.txt", "foo", 0, "bar", null);
+        checkDataCentersDistribution(serviceList.split(","), obtainsDataCenters(commonspec.getRemoteSSHConnection().getResult()).split(";"));
+        executeCommand("rm -rf aux.txt", "foo", 0, "bar", null);
+
+    }
+    /**
+     * Check if all task of a service are correctly distributed in all datacenters of the cluster
+     *
+     * @param serviceList all task deployed in the cluster separated by a semicolumn.
+     * @param dataCentersIps all ips of the datacenters to be checked
+     *                       Example: ip_1_dc1, ip_2_dc1;ip_3_dc2,ip_4_dc2
+     * @throws Exception
+     *
+     */
+    @Given("^services '(.+?)' are splitted correctly in datacenters '(.+?)'$")
+    public void checkServicesDistributionMultiDataCenterPram(String serviceList, String dataCentersIps) throws Exception {
+        checkDataCentersDistribution(serviceList.split(","), dataCentersIps.split(";"));
+    }
+
+    public void checkDataCentersDistribution(String[] serviceListArray, String[] dataCentersIpsArray) throws Exception {
+        int[] expectedDistribution = new int[dataCentersIpsArray.length];
+        int[] results = new int[dataCentersIpsArray.length];
+        //Calculamos distribucion
+        int div = serviceListArray.length / dataCentersIpsArray.length;
+        int resto = serviceListArray.length % dataCentersIpsArray.length;
+        for (int i = 0; i < expectedDistribution.length; i++) {
+            expectedDistribution[i] = div;
+        }
+        for (int i = 0; i < resto; i++) {
+            expectedDistribution[i] = expectedDistribution[i] + 1;
+        }
+        ///Fin calculo distribucion
+        for (int i = 0; i < serviceListArray.length; i++) {
+            executeCommand("dcos task | grep " + serviceListArray[i] + " | awk '{print $2}'", "foo", 0, "bar", null);
+            String service_ip = commonspec.getRemoteSSHConnection().getResult();
+            for (int x = 0; x < dataCentersIpsArray.length; x++) {
+                if (dataCentersIpsArray[x].toLowerCase().contains(service_ip.toLowerCase())) {
+                    results[x] = results[x] + 1;
+                }
+            }
+        }
+        Arrays.sort(expectedDistribution);
+        Arrays.sort(results);
+        assertThat(expectedDistribution.length).isEqualTo(results.length);
+        for (int i = 0; i < results.length; i++) {
+            assertThat(expectedDistribution[i]).isEqualTo(results[i]);
+        }
+    }
+
+    public String obtainsDataCenters(String jsonString) {
+        Map<String, String> datacentersDistribution = new HashMap<String, String>();
+        JSONArray jsonArray = new JSONArray(jsonString);
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject object = jsonArray.getJSONObject(i);
+            String ip = object.getString("hostname");
+            String datacenter = ((JSONObject) object.get("attributes")).getString("dc");
+            String existValue = datacentersDistribution.get(datacenter);
+            if (existValue == null) {
+                datacentersDistribution.put(datacenter, ip);
+            } else {
+                datacentersDistribution.put(datacenter, datacentersDistribution.get(datacenter) + "," + ip);
+            }
+        }
+        String result = "";
+        for (String ips : datacentersDistribution.keySet()) {
+            String key = ips.toString();
+            String value = datacentersDistribution.get(key).toString();
+            result = result + ";" + value;
+        }
+        return result.substring(1, result.length());
     }
 
 }

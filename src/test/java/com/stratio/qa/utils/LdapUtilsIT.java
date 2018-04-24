@@ -53,7 +53,7 @@ public class LdapUtilsIT {
         }
     }
 
-    @Test
+    @Test(enabled=false)
     public void searchRegularUserTest(){
         String dn = "dc=stratio,dc=com";
         String filter = "uid=abrookes";
@@ -86,7 +86,7 @@ public class LdapUtilsIT {
         }
     }
 
-    @Test
+    @Test(enabled=false)
     /*
      * This test assumes RFC2307bis schema in the LDAP server
      */

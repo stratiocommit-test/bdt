@@ -17,12 +17,15 @@ package com.stratio.qa.specs;
 
 import com.stratio.qa.utils.ThreadProperty;
 import cucumber.api.DataTable;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -87,5 +90,15 @@ public class GivenGTest {
             assertThat(e.getMessage()).as("Unexpected exception message").isEqualTo(null);
         }
 
+    }
+
+    @Test
+    public void testCheckHashMap() throws Exception {
+        ThreadProperty.set("class", this.getClass().getCanonicalName());
+        String jsonExample = "[{\"attributes\": {\"dc\": \"dc1\", \"label\": \"all\"}, \"hostname\": \"1\" }, {\"attributes\": {\"dc\": \"dc2\", \"label\": \"all\"}, \"hostname\": \"2\" },{\"attributes\": {\"dc\": \"dc3\", \"label\": \"all\"}, \"hostname\": \"3\" } ]";
+        CommonG commong = new CommonG();
+        GivenGSpec giveng = new GivenGSpec(commong);
+        String result = giveng.obtainsDataCenters(jsonExample);
+        Assert.assertEquals(result.split(";").length, 3);
     }
 }
