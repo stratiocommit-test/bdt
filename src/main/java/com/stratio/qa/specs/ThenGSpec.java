@@ -276,7 +276,14 @@ public class ThenGSpec extends BaseGSpec {
     public void assertSeleniumTextOnElementPresent(Integer index, String text) {
         assertThat(commonspec.getPreviousWebElements()).as("There are less found elements than required")
                 .hasAtLeast(index);
-        assertThat(commonspec.getPreviousWebElements().getPreviousWebElements().get(index)).getCommonspec().matchesOrContains(text);
+        String elementText = commonspec.getPreviousWebElements().getPreviousWebElements().get(index).getText().replace("\n", " ").replace("\r", " ");
+        if (!elementText.startsWith("regex:")) {
+            //We are verifying that a web element contains a string
+            assertThat(elementText.matches("(.*)" + text + "(.*)")).isTrue();
+        } else {
+            //We are verifying that a web element contains a regex
+            assertThat(elementText.matches(text.substring(text.indexOf("regex:") + 6, text.length()))).isTrue();
+        }
     }
 
     /**
