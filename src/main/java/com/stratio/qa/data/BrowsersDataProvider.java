@@ -190,7 +190,10 @@ public final class BrowsersDataProvider {
                                 Pattern pat = Pattern.compile("browserName=(.*?),.*?(version=(.*?)[,|}])");
                                 Matcher m = pat.matcher(browserDetails.attr("title"));
                                 while (m.find()) {
-                                    response.add(m.group(1) + "_" + m.group(3));
+                                    String browser = m.group(1) + "_" + m.group(3);
+                                    if (browser.equals(System.getProperty("FORCE_BROWSER"))) {
+                                        response.add(browser);
+                                    }
                                 }
                             }
                         } else {
