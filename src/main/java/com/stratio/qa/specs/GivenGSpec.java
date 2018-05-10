@@ -38,6 +38,8 @@ import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
 import static com.stratio.qa.assertions.Assertions.assertThat;
 
 /**
@@ -850,6 +852,37 @@ public class GivenGSpec extends BaseGSpec {
             commonspec.getLogger().info("Success! Response value not found after " + timeout + " seconds");
         }
     }
+
+
+    /**
+     * Checks if there are any unused nodes in the cluster and returns the IP of one of them.
+     * REQUIRES A PREVIOUSLY-ESTABLISHED SSH CONNECTION TO DCOS-CLI TO WORK
+     *
+     * @param hosts: list of IPs that will be investigated
+     * @param envVar: environment variable name
+     * @throws Exception
+     *
+     */
+    @Given("^I save the IP of an unused node in hosts '(.+?)' in the in environment variable '(.+?)'?$")
+    public void getUnusedNode(String hosts, String envVar) throws Exception {
+        Set<String> hostList = new HashSet(Arrays.asList(hosts.split(",")));
+
+        //Get the list of currently used hosts
+        executeCommand("dcos task | awk '{print $2}'", "foo", 0, "bar", null);
+        String results = commonspec.getRemoteSSHConnection().getResult();
+        Set<String> usedHosts = new HashSet(Arrays.asList(results.replaceAll("\r", "").split("\n")));
+
+        //We get the nodes not being used
+        hostList.removeAll(usedHosts);
+
+        if (hostList.size() == 0) {
+            throw new IllegalStateException("No unused nodes in the cluster.");
+        } else {
+            //Pick the first available node
+            ThreadProperty.set(envVar, hostList.iterator().next());
+        }
+    }
+
 
     /**
      * Check if all task of a service are correctly distributed in all datacenters of the cluster
