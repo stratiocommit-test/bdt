@@ -122,6 +122,7 @@ public class CucumberRunner {
         uniqueGlue.add("classpath:com/stratio/rest_proxy/specs");
         uniqueGlue.add("classpath:com/stratio/spark/tests/specs");
         uniqueGlue.add("classpath:com/stratio/schema/discovery/specs");
+        uniqueGlue.add("classpath:com/stratio/pgbouncer/specs");
 
         runtimeOptions.getGlue().clear();
         runtimeOptions.getGlue().addAll(uniqueGlue);
