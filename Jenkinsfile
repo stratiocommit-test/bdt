@@ -67,11 +67,18 @@ hose {
         ['UBUNTU': [
            'image': 'stratio/ubuntu-base:16.04',
            'cmd': '/usr/sbin/sshd -D -e']],
+        ['VAULT': [
+           'image': 'vault:0.6.2',
+           'env': [
+              'VAULT_DEV_ROOT_TOKEN_ID=stratio',
+              'VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200'],
+           'sleep': 5,
+           'healthcheck': 8200]],
     ]
     
     ITPARAMETERS = """
-	| -DSELENIUM_GRID=selenium391.cd:4444 
-	| -DFORCE_BROWSER=chrome_64%%JUID
+	    | -DSELENIUM_GRID=selenium391.cd:4444
+	    | -DFORCE_BROWSER=chrome_64%%JUID
         | -DMONGO_HOST=%%MONGODB
         | -DCASSANDRA_HOST=%%CASSANDRA#0
         | -DES_NODE=%%ELASTICSEARCH#0
@@ -86,6 +93,7 @@ hose {
         | -DLDAP_USER='cn=admin,dc=stratio,dc=com'
         | -DLDAP_PASSWORD=stratio
         | -DLDAP_SSL=false
+        | -DVAULT_URL=%%VAULT
         | -DLDAP_URL=%%LDAP:389""".stripMargin().stripIndent()
     
     DEV = { config ->        
