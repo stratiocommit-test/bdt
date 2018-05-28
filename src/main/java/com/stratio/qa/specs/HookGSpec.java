@@ -24,6 +24,8 @@ import com.stratio.qa.utils.ThreadProperty;
 import cucumber.api.Scenario;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
+import java.io.File;
+
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -128,16 +130,22 @@ public class HookGSpec extends BaseGSpec {
             fail("Non available browsers");
         }
 
+        DesiredCapabilities capabilities = null;
+
         String browser = b.split("_")[0];
         String version = b.split("_")[1];
         commonspec.setBrowserName(browser);
         commonspec.getLogger().debug("Setting up selenium for {}", browser);
 
-        DesiredCapabilities capabilities = null;
-
+        String headers = System.getProperty("PROXY_HEADERS");
         switch (browser.toLowerCase()) {
             case "chrome":
                 ChromeOptions chromeOptions = new ChromeOptions();
+
+                if (headers != null && !"".equals(headers)) {
+                    File extension = new File(System.getProperty("MODHEADER_PLUGIN"));
+                    chromeOptions.addExtensions(extension);
+                }
                 chromeOptions.addArguments("--no-sandbox");
                 chromeOptions.addArguments("--ignore-certificate-errors");
                 capabilities = DesiredCapabilities.chrome();
@@ -174,6 +182,25 @@ public class HookGSpec extends BaseGSpec {
         HttpClient.Factory factory = new ApacheHttpClient.Factory(new HttpClientFactory(60000, 60000));
         HttpCommandExecutor executor = new HttpCommandExecutor(new HashMap<String, CommandInfo>(), new URL(grid), factory);
         commonspec.setDriver(new RemoteWebDriver(executor, capabilities));
+        if (headers != null && !"".equals(headers)) {
+            String[] ar = headers.split(",");
+            String headersString = "";
+            for (String s: ar) {
+                headersString += "     {enabled: true, name: '" + s.split(":")[0] + "', value: '" + s.split(":")[1] + "', comment: ''},";
+            }
+            //Remove last coma
+            headersString = (headersString.substring(0, headersString.length() - 1));
+            commonspec.getDriver().get("chrome-extension://idgpnmonknjnojddfkpgkljpfnnfcklj/icon.png");
+            commonspec.getDriver().executeScript(
+                    "localStorage.setItem('profiles', JSON.stringify([{                " +
+                            "  title: 'Selenium', hideComment: true, appendMode: '',           " +
+                            "  headers: [                                                      " +
+                                headersString +
+                            "  ],                                                              " +
+                            "  respHeaders: [],                                                " +
+                            "  filters: []                                                     " +
+                            "}]));                                                             ");
+        }
         commonspec.getDriver().manage().timeouts().pageLoadTimeout(PAGE_LOAD_TIMEOUT, TimeUnit.SECONDS);
         commonspec.getDriver().manage().timeouts().implicitlyWait(IMPLICITLY_WAIT, TimeUnit.SECONDS);
         commonspec.getDriver().manage().timeouts().setScriptTimeout(SCRIPT_TIMEOUT, TimeUnit.SECONDS);
