@@ -42,6 +42,7 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.Select;
 
 import java.io.*;
+import java.sql.Time;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
@@ -139,6 +140,36 @@ public class WhenGSpec extends BaseGSpec {
     }
 
 
+
+    /**
+     * Delete or replace the text on a numbered {@code index} previously found element.
+     *
+     * @param index
+     */
+    @When("^I delete the text '(.+?)' on the element on index '(\\d+?)'( and replace it for '(.+?)')?$")
+    public void seleniumDelete(String text, Integer index, String foo, String replacement) {
+        assertThat(this.commonspec, commonspec.getPreviousWebElements()).as("There are less found elements than required")
+                .hasAtLeast(index);
+
+        Actions actions = new Actions(commonspec.getDriver());
+        actions.moveToElement(commonspec.getPreviousWebElements().getPreviousWebElements().get(index), (text.length() / 2), 0);
+        for (int i = 0; i < (text.length() / 2); i++) {
+            actions.sendKeys(Keys.ARROW_LEFT);
+            actions.build().perform();
+        }
+        for (int i = 0; i < text.length(); i++) {
+            actions.sendKeys(Keys.DELETE);
+            actions.build().perform();
+        }
+        if (replacement != null && replacement.length() != 0) {
+            actions.sendKeys(replacement);
+            actions.build().perform();
+        }
+    }
+
+
+
+
     /**
      * Type a {@code text} on an numbered {@code index} previously found element.
      *
@@ -150,12 +181,18 @@ public class WhenGSpec extends BaseGSpec {
         assertThat(this.commonspec, commonspec.getPreviousWebElements()).as("There are less found elements than required")
                 .hasAtLeast(index);
         while (text.length() > 0) {
+            Actions actions = new Actions(commonspec.getDriver());
             if (-1 == text.indexOf("\\n")) {
-                commonspec.getPreviousWebElements().getPreviousWebElements().get(index).sendKeys(text);
+                actions.moveToElement(commonspec.getPreviousWebElements().getPreviousWebElements().get(index));
+                actions.click();
+                actions.sendKeys(text);
+                actions.build().perform();
                 text = "";
             } else {
-                commonspec.getPreviousWebElements().getPreviousWebElements().get(index).sendKeys(text.substring(0, text.indexOf("\\n")));
-                commonspec.getPreviousWebElements().getPreviousWebElements().get(index).sendKeys(Keys.ENTER);
+                actions.moveToElement(commonspec.getPreviousWebElements().getPreviousWebElements().get(index));
+                actions.click();
+                actions.sendKeys(text.substring(0, text.indexOf("\\n")));
+                actions.build().perform();
                 text = text.substring(text.indexOf("\\n") + 2);
             }
         }
