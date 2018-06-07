@@ -31,6 +31,8 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Fail;
 import org.assertj.core.api.WritableAssertionInfo;
 import org.json.JSONArray;
+import org.ldaptive.LdapAttribute;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebElement;
 
 import java.sql.Connection;
