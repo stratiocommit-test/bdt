@@ -1033,7 +1033,6 @@ public class GivenGSpec extends BaseGSpec {
     /**
      * Connect to JDBC secured/not secured database
      *
-     * @param isSecured if the database is secured (TLS) or not
      * @param database  database connection string
      * @param host      database host
      * @param port      database port
@@ -1044,10 +1043,10 @@ public class GivenGSpec extends BaseGSpec {
      * @param key:      database private key
      * @throws Exception exception     *
      */
-    @Given("^I( securely)? connect with JDBC to database '(.+?)' on host '(.+?)' and port '(.+?)' with user '(.+?)'( and password '(.+?)')?( and root ca '(.+?)')?(, crt '(.+?)')?( and key '(.+?)' certificates)?$")
-    public void connectDatabasePostgres(String isSecured, String database, String host, String port, String user, String foo, String password, String foo1, String ca, String foo2, String crt, String foo3, String key) throws Exception {
+    @Given("^I connect with JDBC and security type '(TLS|MD5|TRUST|CERT|LDAP|tls|md5|trust|cert|ldap)' to database '(.+?)' on host '(.+?)' and port '(.+?)' with user '(.+?)'( and password '(.+?)')?( and root ca '(.+?)')?(, crt '(.+?)')?( and key '(.+?)' certificates)?$")
+    public void connectDatabasePostgres(String securityType, String database, String host, String port, String user, String foo1, String password, String foo2, String ca, String foo3, String crt, String foo4, String key) throws Exception {
         this.commonspec.getExceptions().clear();
-        if (isSecured != null) {
+        if ("TLS".equals(securityType) || "tls".equals(securityType) || "CERT".equals(securityType) || "cert".equals(securityType)) {
             commonspec.getLogger().debug("opening secure database");
             try {
                 this.commonspec.connectToPostgreSQLDatabase(database, host, port, user, password, true, ca, crt, key);
