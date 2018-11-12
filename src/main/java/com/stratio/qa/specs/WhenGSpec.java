@@ -745,7 +745,18 @@ public class WhenGSpec extends BaseGSpec {
         commonspec.getKafkaUtils().deleteTopic(topic_name);
     }
 
-
+    /**
+     * Copy Kafka Topic content to file
+     *
+     * @param topic_name
+     * @param filename
+     * @param header
+     * @throws Exception
+     */
+    @When("^I copy the kafka topic '(.*?)' to file '(.*?)' with headers '(.*?)'$")
+    public void topicToFile(String topic_name, String filename, String header) throws Exception {
+        commonspec.getKafkaUtils().resultsToFile(topic_name, filename, header);
+    }
     /**
      * Delete zPath, it should be empty
      *
