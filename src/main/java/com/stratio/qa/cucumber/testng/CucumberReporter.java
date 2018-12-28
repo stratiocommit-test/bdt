@@ -513,6 +513,19 @@ public class CucumberReporter implements Formatter, Reporter {
             List<String> tagList = new ArrayList<>();
             tagList = tags.stream().map(Tag::getName).collect(Collectors.toList());
 
+            for (Result result : results) {
+                if ("failed".equals(result.getStatus())) {
+                    failed = result;
+                } else if ("undefined".equals(result.getStatus()) || "pending".equals(result.getStatus())) {
+                    skipped = result;
+                }
+            }
+            for (Result result : hooks) {
+                if (failed == null && "failed".equals(result.getStatus())) {
+                    failed = result;
+                }
+            }
+
             if (tagList.contains("@ignore")) {
                 ignored = true;
                 for (String tag: tagList) {
@@ -580,7 +593,7 @@ public class CucumberReporter implements Formatter, Reporter {
                 Element systemOut = systemOutPrintJunit(docJunit, exceptionmsg);
                 Junit.appendChild(systemOut);
 
-            } else if ((stringBuilder.toString().contains("${")) || (stringBuilder.toString().contains("!{")) || (stringBuilder.toString().contains("@{"))) {
+            } else if ((stringBuilder.toString().contains("${") || stringBuilder.toString().contains("!{") || stringBuilder.toString().contains("@{")) && (failed != null || skipped != null)) {
                 element.setAttribute(STATUS, "FAIL");
                 Element exception = createException(doc, "The scenario has unreplaced variables.",
                         "The scenario has unreplaced variables.", " ");
@@ -591,18 +604,6 @@ public class CucumberReporter implements Formatter, Reporter {
                 Element systemOut = systemOutPrintJunit(docJunit, stringBuilder.toString());
                 Junit.appendChild(systemOut);
             } else {
-                for (Result result : results) {
-                    if ("failed".equals(result.getStatus())) {
-                        failed = result;
-                    } else if ("undefined".equals(result.getStatus()) || "pending".equals(result.getStatus())) {
-                        skipped = result;
-                    }
-                }
-                for (Result result : hooks) {
-                    if (failed == null && "failed".equals(result.getStatus())) {
-                        failed = result;
-                    }
-                }
                 if (failed != null) {
                     element.setAttribute(STATUS, "FAIL");
                     StringWriter stringWriter = new StringWriter();
