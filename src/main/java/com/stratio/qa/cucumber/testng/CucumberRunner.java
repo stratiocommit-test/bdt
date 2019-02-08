@@ -16,7 +16,8 @@
 
 package com.stratio.qa.cucumber.testng;
 
-import cucumber.api.CucumberOptions;
+import cucumber.api.event.EventListener;
+import cucumber.api.formatter.StrictAware;
 import cucumber.runtime.ClassFinder;
 import cucumber.runtime.CucumberException;
 import cucumber.runtime.RuntimeOptions;
@@ -66,8 +67,7 @@ public class CucumberRunner {
         classLoader = clazz.getClassLoader();
         ResourceLoader resourceLoader = new MultiLoader(classLoader);
 
-        RuntimeOptionsFactory runtimeOptionsFactory = new RuntimeOptionsFactory(clazz,
-                new Class[]{CucumberOptions.class});
+        RuntimeOptionsFactory runtimeOptionsFactory = new RuntimeOptionsFactory(clazz);
         runtimeOptions = runtimeOptionsFactory.create();
         String testSuffix = System.getProperty("TESTSUFFIX");
         String targetExecutionsPath = "target/executions/";
@@ -129,18 +129,26 @@ public class CucumberRunner {
         runtimeOptions.getGlue().clear();
         runtimeOptions.getGlue().addAll(uniqueGlue);
 
-        runtimeOptions.addFormatter(reporterTestNG);
-        Set<Class<? extends ICucumberFormatter>> implementers = new Reflections("com.stratio.qa.utils")
-                .getSubTypesOf(ICucumberFormatter.class);
+        runtimeOptions.addPlugin(reporterTestNG);
+        Set<Class<? extends StrictAware>> implementers = new Reflections("com.stratio.qa.utils")
+                .getSubTypesOf(StrictAware.class);
+        List<Object> additionalPlugins = new ArrayList<Object>();
 
-        for (Class<? extends ICucumberFormatter> implementerClazz : implementers) {
+        for (Class<? extends StrictAware> implementerClazz : implementers) {
             Constructor<?> ctor = implementerClazz.getConstructor();
             ctor.setAccessible(true);
-            runtimeOptions.addFormatter((ICucumberFormatter) ctor.newInstance());
+            Object newPlugin = ctor.newInstance();
+            additionalPlugins.add(newPlugin);
+            runtimeOptions.addPlugin((StrictAware) newPlugin);
         }
 
         ClassFinder classFinder = new ResourceLoaderClassFinder(resourceLoader, classLoader);
         runtime = new cucumber.runtime.Runtime(resourceLoader, classFinder, classLoader, runtimeOptions);
+
+        reporterTestNG.setEventPublisher(runtime.getEventBus());
+        for (Object plugin : additionalPlugins) {
+            ((EventListener) plugin).setEventPublisher(runtime.getEventBus());
+        }
     }
 
     /**
@@ -159,7 +167,7 @@ public class CucumberRunner {
             Iterator<Throwable> iterator = runtime.getErrors().iterator();
             while (iterator.hasNext()) {
                 Throwable value = iterator.next();
-                if (value.getMessage().contains("TESTS EXECUTION ABORTED!")) {
+                if (value.getMessage() != null && value.getMessage().contains("TESTS EXECUTION ABORTED!")) {
                     iterator.remove();
                 }
             }

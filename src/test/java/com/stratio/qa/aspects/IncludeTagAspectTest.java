@@ -19,10 +19,7 @@ package com.stratio.qa.aspects;
 import com.stratio.qa.exceptions.IncludeException;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
@@ -42,6 +39,11 @@ public class IncludeTagAspectTest {
     }
 
     @Test
+    public void testGetScenarioParams() {
+        assertThat("To copy").as("Test scenario name is extracted correctly").isEqualTo(inctag.getScenName("@include(feature: test.feature,scenario: To copy,params:param1=1)"));
+    }
+
+    @Test
     public void testGetParams() {
         assertThat(4).as("Test that the number of keys and values are correctly calculated for params").isEqualTo(inctag.getParams("@include(feature: test.feature,scenario: To copy,params: [time1:9, time2:9])").length);
     }
@@ -51,6 +53,13 @@ public class IncludeTagAspectTest {
         String keysNotReplaced = "Given that <time1> is not equal to <time2> into a step";
         String[] keys = {"<time1>", "9", "<time2>", "8"};
         assertThat("Given that 9 is not equal to 8 into a step").as("Test that keys are correctly replaced at scenario outlines").isEqualTo(inctag.doReplaceKeys(keysNotReplaced, keys));
+    }
+
+    @Test
+    public void testDoReplaceKeysException() {
+        String keysNotReplaced = "Given that <time1> is not equal to <time3> into a step";
+        String[] keys = {"<time1>", "9", "<time2>", "8"};
+        assertThatExceptionOfType(IncludeException.class).isThrownBy(() -> inctag.doReplaceKeys(keysNotReplaced, keys));
     }
 
     @Test
@@ -140,5 +149,32 @@ public class IncludeTagAspectTest {
         };
         inctag.exampleMultiloopLines(params, lines, 0);
         assertThat(lines).as("Test that @multiloop lines are created properly for multiple lists").containsExactly(expectedLines);
+    }
+
+    @Test
+    public void testParseLines() throws IncludeException {
+        String[] originalFeature = new String[]
+                {"Feature: Test",
+                 "@include(feature:logger.feature,scenario:Some simple request)",
+                 "Scenario: Scenario with include",
+                 "Given I run 'echo 1' locally"};
+        List<String> lines = new ArrayList<>(Arrays.asList(originalFeature));
+        inctag.parseLines(lines, "src/test/resources/features/");
+        assertThat(lines.get(1)).as("Test that Scenario line was moved to include line").isEqualTo("Scenario: Scenario with include");
+        assertThat(lines).as("Test that array doesn't contains @include tag").doesNotContain("@include");
+    }
+
+    @Test
+    public void testParseLinesMultipleIncludes() throws IncludeException {
+        String[] originalFeature = new String[]
+                {"Feature: Test",
+                 "@include(feature:logger.feature,scenario:Some simple request)",
+                 "@include(feature:logger.feature,scenario:Some simple request)",
+                 "Scenario: Scenario with include",
+                 "Given I run 'echo 1' locally"};
+        List<String> lines = new ArrayList<>(Arrays.asList(originalFeature));
+        inctag.parseLines(lines, "src/test/resources/features/");
+        assertThat(lines.get(1)).as("Test that Scenario line was moved to first include line").isEqualTo("Scenario: Scenario with include");
+        assertThat(lines).as("Test that array doesn't contains @include tag").doesNotContain("@include");
     }
 }

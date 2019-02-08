@@ -16,113 +16,107 @@
 
 package com.stratio.qa.utils;
 
-import com.stratio.qa.cucumber.testng.ICucumberFormatter;
-import com.stratio.qa.cucumber.testng.ICucumberReporter;
+import com.stratio.qa.cucumber.testng.TestSourcesModel;
+import com.stratio.qa.cucumber.testng.TestSourcesModelUtil;
 import com.stratio.qa.specs.BaseGSpec;
 import com.stratio.qa.specs.HookGSpec;
-import gherkin.formatter.model.*;
+import cucumber.api.TestCase;
+import cucumber.api.event.*;
+import cucumber.api.event.EventListener;
+import cucumber.api.formatter.StrictAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
-public class CukesGHooks extends BaseGSpec implements ICucumberReporter, ICucumberFormatter {
+public class CukesGHooks extends BaseGSpec implements EventListener, StrictAware {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getCanonicalName());
 
-    Feature feature;
+    private String currentFeatureFile = null;
 
-    public Scenario scenario;
+    private boolean isLastStepBackground = false;
 
     public CukesGHooks() {
     }
 
-    @Override
-    public void syntaxError(String state, String event, List<String> legalEvents, String uri, Integer line) {
-    }
-
-    @Override
-    public void uri(String uri) {
-    }
-
-    @Override
-    public void examples(Examples examples) {
-    }
-
-    @Override
-    public void startOfScenarioLifeCycle(Scenario scenario) {
-    }
-
-    @Override
-    public void done() {
-    }
-
-    @Override
-    public void close() {
-    }
-
-    @Override
-    public void eof() {
-    }
-
-    @Override
-    public void background(Background background) {
-        logger.info("Background: {}", background.getName());
-    }
-
-    @Override
-    public void feature(Feature feature) {
-        this.feature = feature;
-        ThreadProperty.set("feature", feature.getName());
-    }
-
-    @Override
-    public void scenario(Scenario scenario) {
-        this.scenario = scenario;
-        if (HookGSpec.loggerEnabled) {
-            logger.info("Feature/Scenario: {}/{} ", feature.getName(), scenario.getName());
+    private EventHandler<TestSourceRead> testSourceReadHandler = new EventHandler<TestSourceRead>() {
+        @Override
+        public void receive(TestSourceRead event) {
+            handleTestSourceRead(event);
         }
-        HookGSpec.loggerEnabled = true;
-        ThreadProperty.set("scenario", scenario.getName());
+    };
+
+    private EventHandler<TestCaseStarted> caseStartedHandler = new EventHandler<TestCaseStarted>() {
+        @Override
+        public void receive(TestCaseStarted event) {
+            handleTestCaseStarted(event);
+        }
+    };
+
+    private EventHandler<TestStepStarted> stepStartedHandler = new EventHandler<TestStepStarted>() {
+        @Override
+        public void receive(TestStepStarted event) {
+            handleTestStepStarted(event);
+        }
+    };
+
+    private EventHandler<TestCaseFinished> caseFinishedHandler = new EventHandler<TestCaseFinished>() {
+        @Override
+        public void receive(TestCaseFinished event) {
+            handleTestCaseFinished(event);
+        }
+    };
+
+    @Override
+    public void setEventPublisher(EventPublisher publisher) {
+        publisher.registerHandlerFor(TestSourceRead.class, testSourceReadHandler);
+        publisher.registerHandlerFor(TestCaseStarted.class, caseStartedHandler);
+        publisher.registerHandlerFor(TestCaseFinished.class, caseFinishedHandler);
+        publisher.registerHandlerFor(TestStepStarted.class, stepStartedHandler);
     }
 
     @Override
-    public void scenarioOutline(ScenarioOutline scenarioOutline) {
+    public void setStrict(boolean strict) {
     }
 
-    @Override
-    public void step(Step step) {
+    private void handleTestSourceRead(TestSourceRead event) {
+        TestSourcesModelUtil.INSTANCE.getTestSourcesModel().addTestSourceReadEvent(event.uri, event);
     }
 
-    @Override
-    public void endOfScenarioLifeCycle(Scenario scenario) {
+    private void handleTestCaseStarted(TestCaseStarted event) {
+        if (currentFeatureFile == null || !currentFeatureFile.equals(event.testCase.getUri())) {
+            currentFeatureFile = event.testCase.getUri();
+        }
+        TestCase tc = event.testCase;
+        if (HookGSpec.loggerEnabled) {
+            logger.info("Feature/Scenario: {}/{} ", TestSourcesModelUtil.INSTANCE.getTestSourcesModel().getFeatureName(currentFeatureFile), tc.getName());
+            ThreadProperty.set("feature", TestSourcesModelUtil.INSTANCE.getTestSourcesModel().getFeatureName(currentFeatureFile));
+            ThreadProperty.set("scenario", tc.getName());
+        }
+
+    }
+
+    private void handleTestStepStarted(TestStepStarted event) {
+        if (HookGSpec.loggerEnabled) {
+            if (!event.testStep.isHook()) {
+                TestSourcesModel.AstNode astNode = TestSourcesModelUtil.INSTANCE.getTestSourcesModel().getAstNode(currentFeatureFile, event.testStep.getStepLine());
+                if (TestSourcesModel.isBackgroundStep(astNode)) {
+                    if (!isLastStepBackground) {
+                        logger.info(" Background:");
+                    }
+                    isLastStepBackground = true;
+                } else {
+                    if (isLastStepBackground) {
+                        logger.info(" Steps:");
+                    }
+                    isLastStepBackground = false;
+                }
+            }
+        }
+    }
+
+    private void handleTestCaseFinished(TestCaseFinished event) {
         if (HookGSpec.loggerEnabled) {
             logger.info(""); //empty line to split scenarios
         }
     }
-
-    @Override
-    public void before(Match match, Result result) {
-    }
-
-    @Override
-    public void result(Result result) {
-    }
-
-    @Override
-    public void after(Match match, Result result) {
-    }
-
-    @Override
-    public void match(Match match) {
-    }
-
-    @Override
-    public void embedding(String mimeType, byte[] data) {
-    }
-
-    @Override
-    public void write(String text) {
-    }
-
 }

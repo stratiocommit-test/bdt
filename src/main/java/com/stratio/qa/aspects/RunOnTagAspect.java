@@ -17,18 +17,16 @@
 package com.stratio.qa.aspects;
 
 import com.stratio.qa.utils.ThreadProperty;
-import gherkin.formatter.model.Comment;
-import gherkin.formatter.model.Scenario;
-import gherkin.formatter.model.Tag;
+import gherkin.events.PickleEvent;
+import gherkin.pickles.PickleLocation;
+import gherkin.pickles.PickleTag;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.util.parsing.combinator.testing.Str;
 
-import javax.swing.tree.ExpandVetoException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,10 +35,9 @@ public class RunOnTagAspect {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getCanonicalName());
 
-    @Pointcut("execution (gherkin.formatter.model.Scenario.new(..)) && " +
-              "args(comments, tags, keyword, name, description, line, id)")
-    protected void AddRunOnTagPointcutScenario(List<Comment> comments, List<Tag> tags, String keyword, String name,
-                                               String description, Integer line, String id) {
+    @Pointcut("execution (* cucumber.runtime.Runtime.matchesFilters(..)) && " +
+              "args(pickleEvent)")
+    protected void AddRunOnTagPointcutScenario(PickleEvent pickleEvent) {
     }
 
     /**
@@ -68,40 +65,35 @@ public class RunOnTagAspect {
      *<dd>The scenario will omitted if ALL of params are defined. (AND)</dd>
      *</dl>
      *
-     * @param pjp ProceedingJoinPoint
-     * @param comments comments
-     * @param tags tags of scenario
-     * @param keyword keyword
-     * @param name name
-     * @param description description
-     * @param line line
-     * @param id id
+     * @param pickleEvent pickleEvent
      * @throws Throwable exception
      */
-    @Around(value = "AddRunOnTagPointcutScenario(comments, tags, keyword, name, description, line, id)")
-    public void aroundAddRunOnTagPointcut(ProceedingJoinPoint pjp, List<Comment> comments, List<Tag> tags,
-                                                  String keyword, String name, String description, Integer line, String id) throws Throwable {
-
-        Scenario linescn = (Scenario) pjp.getTarget();
-        Boolean exit = tagsIteration(tags, line);
-
-        if (exit) {
-            ThreadProperty.set("skippedOnParams" + pjp.getArgs()[3].toString() + linescn.getLine(), "true");
+    @Around(value = "AddRunOnTagPointcutScenario(pickleEvent)")
+    public boolean aroundAddRunOnTagPointcut(ProceedingJoinPoint pjp, PickleEvent pickleEvent) throws Throwable {
+        int line = 0;
+        if (!pickleEvent.pickle.getLocations().isEmpty()) {
+            line = pickleEvent.pickle.getLocations().get(0).getLine();
         }
+        Boolean exit = tagsIteration(pickleEvent.pickle.getTags(), line);
+        if (exit) {
+            ThreadProperty.set("skippedOnParams" + pickleEvent.pickle.getName() + line, "true");
+        }
+        return (Boolean) pjp.proceed();
     }
 
-    public boolean tagsIteration(List<Tag> tags, Integer line) throws Exception {
-        for (Tag tag : tags) {
+    public boolean tagsIteration(List<PickleTag> tags, Integer line) throws Exception {
+        PickleLocation pickleLocation = new PickleLocation(line, 0);
+        for (PickleTag tag : tags) {
             if (tag.getName().contains("@runOnEnv")) {
                 if (!checkParams(getParams(tag.getName()))) {
-                    tags.add(new Tag("@ignore", line));
-                    tags.add(new Tag("@envCondition", line));
+                    tags.add(new PickleTag(pickleLocation, "@ignore"));
+                    tags.add(new PickleTag(pickleLocation, "@envCondition"));
                     return true;
                 }
             } else if (tag.getName().contains("@skipOnEnv")) {
                 if (checkParams(getParams(tag.getName()))) {
-                    tags.add(new Tag("@ignore", line));
-                    tags.add(new Tag("@envCondition", line));
+                    tags.add(new PickleTag(pickleLocation, "@ignore"));
+                    tags.add(new PickleTag(pickleLocation, "@envCondition"));
                     return true;
                 }
             }
@@ -211,22 +203,13 @@ public class RunOnTagAspect {
             } else if (params[0][0].contains(">")) {
                 String param = params[0][0].split(">")[0];
                 String value = params[0][0].split(">")[1];
-                if (System.getProperty(param, "").isEmpty()) {
+                if (System.getProperty(param, "").isEmpty() || !(value.compareTo(System.getProperty(param)) < 0)) {
                     result =  false;
-                }
-
-                if (!(value.compareTo(System.getProperty(param)) < 0)) {
-                    result = false;
                 }
             } else if (params[0][0].contains("<")) {
                 String param = params[0][0].split("<")[0];
                 String value = params[0][0].split("<")[1];
-
-                if (System.getProperty(param, "").isEmpty()) {
-                    result = false;
-                }
-
-                if (!(value.compareTo(System.getProperty(param)) > 0)) {
+                if (System.getProperty(param, "").isEmpty() || !(value.compareTo(System.getProperty(param)) > 0)) {
                     result = false;
                 }
             } else {

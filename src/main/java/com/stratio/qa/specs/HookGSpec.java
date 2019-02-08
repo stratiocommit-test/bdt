@@ -19,8 +19,8 @@ package com.stratio.qa.specs;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;
 import com.stratio.qa.exceptions.SuppressableException;
-import com.stratio.qa.utils.CukesGHooks;
 import com.stratio.qa.utils.ThreadProperty;
+import cucumber.api.Result;
 import cucumber.api.Scenario;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
@@ -88,22 +88,24 @@ public class HookGSpec extends BaseGSpec {
 
     @After
     public void watch_this_tagged_scenario(Scenario scenario) throws Exception {
+        loggerEnabled = true;
         if (quietasdefault.equals("false")) {
             if (!isTaggedAsNotImportant(scenario)) {
                 boolean isFailed = scenario.isFailed();
                 if (isFailed) {
                     prevScenarioFailed = isFailed;
-                    loggerEnabled = false;
                 }
             }
         } else {
             if (isTagged(scenario)) {
                 boolean isFailed = scenario.isFailed();
                 if (isFailed) {
-                    loggerEnabled = false;
                     prevScenarioFailed = isFailed;
                 }
             }
+        }
+        if (prevScenarioFailed) {
+            loggerEnabled = false;
         }
     }
 
@@ -119,7 +121,7 @@ public class HookGSpec extends BaseGSpec {
      *
      * @throws MalformedURLException
      */
-    @Before(order = ORDER_10, value = {"@mobile,@web"})
+    @Before(order = ORDER_10, value = {"@mobile or @web"})
     public void seleniumSetup() throws MalformedURLException {
         String grid = System.getProperty("SELENIUM_GRID");
         if (grid == null) {
@@ -218,7 +220,7 @@ public class HookGSpec extends BaseGSpec {
     /**
      * Close selenium web driver.
      */
-    @After(order = ORDER_20, value = {"@mobile,@web"})
+    @After(order = ORDER_20, value = {"@mobile or @web"})
     public void seleniumTeardown() {
         if (commonspec.getDriver() != null) {
             commonspec.getLogger().debug("Shutdown Selenium client");
@@ -236,7 +238,7 @@ public class HookGSpec extends BaseGSpec {
 
     @After
     public void afterScenario(Scenario scenario) throws Throwable {
-        if (scenario.getStatus().equalsIgnoreCase("undefined")) {
+        if (scenario.getStatus() == Result.Type.UNDEFINED) {
             if (!commonspec.getExceptions().isEmpty()) {
                 scenario.write(commonspec.getExceptions().get(commonspec.getExceptions().size() - 1).toString());
             }

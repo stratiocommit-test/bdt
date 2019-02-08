@@ -1399,11 +1399,11 @@ public class CommonG {
             List<Map<String, Object>> resultsListExpected = new ArrayList<Map<String, Object>>();
             Map<String, Object> resultsCucumber;
 
-            for (int e = 1; e < expectedResults.getGherkinRows().size(); e++) {
+            for (int e = 1; e < expectedResults.getPickleRows().size(); e++) {
                 resultsCucumber = new HashMap<String, Object>();
 
-                for (int i = 0; i < expectedResults.getGherkinRows().get(0).getCells().size(); i++) {
-                    resultsCucumber.put(expectedResults.getGherkinRows().get(0).getCells().get(i), expectedResults.getGherkinRows().get(e).getCells().get(i));
+                for (int i = 0; i < expectedResults.getPickleRows().get(0).getCells().size(); i++) {
+                    resultsCucumber.put(expectedResults.getPickleRows().get(0).getCells().get(i).getValue(), expectedResults.getPickleRows().get(e).getCells().get(i).getValue());
 
                 }
                 resultsListExpected.add(resultsCucumber);
@@ -1490,11 +1490,11 @@ public class CommonG {
             List<Map<String, Object>> resultsListExpected = new ArrayList<Map<String, Object>>();
             Map<String, Object> resultsCucumber;
 
-            for (int e = 1; e < expectedResults.getGherkinRows().size(); e++) {
+            for (int e = 1; e < expectedResults.getPickleRows().size(); e++) {
                 resultsCucumber = new HashMap<String, Object>();
 
-                for (int i = 0; i < expectedResults.getGherkinRows().get(0).getCells().size(); i++) {
-                    resultsCucumber.put(expectedResults.getGherkinRows().get(0).getCells().get(i), expectedResults.getGherkinRows().get(e).getCells().get(i));
+                for (int i = 0; i < expectedResults.getPickleRows().get(0).getCells().size(); i++) {
+                    resultsCucumber.put(expectedResults.getPickleRows().get(0).getCells().get(i).getValue(), expectedResults.getPickleRows().get(e).getCells().get(i).getValue());
 
                 }
                 resultsListExpected.add(resultsCucumber);
@@ -1563,11 +1563,11 @@ public class CommonG {
             List<Map<String, Object>> resultsListExpected = new ArrayList<Map<String, Object>>();
             Map<String, Object> resultsCucumber;
 
-            for (int e = 1; e < expectedResults.getGherkinRows().size(); e++) {
+            for (int e = 1; e < expectedResults.getPickleRows().size(); e++) {
                 resultsCucumber = new HashMap<String, Object>();
 
-                for (int i = 0; i < expectedResults.getGherkinRows().get(0).getCells().size(); i++) {
-                    resultsCucumber.put(expectedResults.getGherkinRows().get(0).getCells().get(i), expectedResults.getGherkinRows().get(e).getCells().get(i));
+                for (int i = 0; i < expectedResults.getPickleRows().get(0).getCells().size(); i++) {
+                    resultsCucumber.put(expectedResults.getPickleRows().get(0).getCells().get(i).getValue(), expectedResults.getPickleRows().get(e).getCells().get(i).getValue());
 
                 }
                 resultsListExpected.add(resultsCucumber);
@@ -2251,6 +2251,28 @@ public class CommonG {
         }
 
         return health;
+    }
+
+    /**
+     * Executes the command specified in remote system
+     *
+     * @param command    command to be run locally
+     * @param exitStatus command exit status
+     * @param envVar     environment variable name
+     * @throws Exception exception
+     **/
+    public void executeCommand(String command, Integer exitStatus, String envVar) throws Exception {
+        if (exitStatus == null) {
+            exitStatus = 0;
+        }
+
+        command = "set -o pipefail && alias grep='grep --color=never' && " + command;
+        getRemoteSSHConnection().runCommand(command);
+        setCommandResult(getRemoteSSHConnection().getResult());
+        setCommandExitStatus(getRemoteSSHConnection().getExitStatus());
+        runCommandLoggerAndEnvVar(exitStatus, envVar, Boolean.FALSE);
+
+        Assertions.assertThat(getRemoteSSHConnection().getExitStatus()).isEqualTo(exitStatus);
     }
 
 }

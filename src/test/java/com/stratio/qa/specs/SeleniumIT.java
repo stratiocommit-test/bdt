@@ -16,15 +16,26 @@
 package com.stratio.qa.specs;
 
 import com.stratio.qa.cucumber.testng.CucumberRunner;
-import com.stratio.qa.utils.BaseGTest;
+import com.stratio.qa.utils.BaseTest;
 import cucumber.api.CucumberOptions;
 import org.testng.annotations.Test;
+import org.testng.annotations.Factory;
+import com.stratio.qa.data.BrowsersDataProvider;
 
-@CucumberOptions(format = "json:target/cucumber.json", features = {"src/test/resources/features/checkValue.feature"})
-public class ThenGCheckValueIT extends BaseGTest {
+@CucumberOptions(plugin = "json:target/cucumber.json", features ={
+        "src/test/resources/features/readWebElementTextToVariable.feature",
+        "src/test/resources/features/assertSeleniumNElementExistsIT.feature",
+        "src/test/resources/features/assertSeleniumNElementExistsOnTimeOutIT.feature"
+})
+public class SeleniumIT extends BaseTest {
 
-    @Test(expectedExceptions = {})
-    public void simpleTest() throws Exception {
+    @Factory(enabled = false, dataProviderClass = BrowsersDataProvider.class, dataProvider = "availableUniqueBrowsers")
+    public SeleniumIT(String browser) {
+        this.browser = browser;
+    }
+
+    @Test
+    public void seleniumTest() throws Exception {
         new CucumberRunner(this.getClass()).runCukes();
     }
 }

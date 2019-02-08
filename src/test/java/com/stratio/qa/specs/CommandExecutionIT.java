@@ -16,27 +16,17 @@
 package com.stratio.qa.specs;
 
 import com.stratio.qa.cucumber.testng.CucumberRunner;
-import com.stratio.qa.utils.BaseTest;
+import com.stratio.qa.utils.BaseGTest;
 import cucumber.api.CucumberOptions;
 import org.testng.annotations.Test;
-import org.testng.annotations.Factory;
-import com.stratio.qa.data.BrowsersDataProvider;
 
-@CucumberOptions(format = "json:target/cucumber.json", features ={
-        "src/test/resources/features/readWebElementTextToVariable.feature",
-        "src/test/resources/features/assertCommandExistsOnTimeOutIT.feature",
-        "src/test/resources/features/assertSeleniumNElementExistsIT.feature",
-        "src/test/resources/features/assertSeleniumNElementExistsOnTimeOutIT.feature"
-})
-public class ThenGIT extends BaseTest {
+@CucumberOptions(plugin = "json:target/cucumber.json", features = {
+        "src/test/resources/features/executeCommand.feature",
+        "src/test/resources/features/assertCommandExistsOnTimeOutIT.feature"})
+public class CommandExecutionIT extends BaseGTest {
 
-    @Factory(enabled = false, dataProviderClass = BrowsersDataProvider.class, dataProvider = "availableUniqueBrowsers")
-    public ThenGIT(String browser) {
-        this.browser = browser;
-    }
-
-    @Test
-    public void thenGTest() throws Exception {
+    @Test(expectedExceptions = {})
+    public void commandExecutionTest() throws Exception {
         new CucumberRunner(this.getClass()).runCukes();
     }
 }
