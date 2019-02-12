@@ -245,7 +245,13 @@ public class LoopIncludeTagAspect {
                     if ((lines.get(lineAfterInclude).toUpperCase().contains("SCENARIO:") || lines.get(lineAfterInclude).toUpperCase().contains("OUTLINE:")) && !lines.get(lineAfterInclude).toUpperCase().contains("@INCLUDE")) {
                         lines.set(lineOriginalFeature, lines.get(lineAfterInclude));
                         lines.set(lineAfterInclude, lineToinclude);
-                        lineToinclude = "";
+                        lineToinclude = lines.get(lineOriginalFeature);
+                        for (int lineAux = lineOriginalFeature + 1; lineAux < lineAfterInclude; lineAux++) {
+                            if (lines.get(lineAux).matches("\\s*@[^{].+")) {
+                                lines.set(lineAux - 1, lines.get(lineAux));
+                                lines.set(lineAux, lineToinclude);
+                            }
+                        }
                         break;
                     }
                 }
@@ -335,7 +341,7 @@ public class LoopIncludeTagAspect {
                             }
                         }
                     } else if (!sCurrentLine.toUpperCase().contains("OUTLINE") && sCurrentLine.toUpperCase().contains("SCENARIO:")) {
-                        while ((sCurrentLine = bufferedFeature.readLine()) != null && !sCurrentLine.toUpperCase().contains("SCENARIO:") && !sCurrentLine.toUpperCase().contains("EXAMPLES:")) {
+                        while ((sCurrentLine = bufferedFeature.readLine()) != null && !sCurrentLine.toUpperCase().contains("SCENARIO:") && !sCurrentLine.toUpperCase().contains("EXAMPLES:") && !sCurrentLine.matches("\\s*@[^{].+")) {
                             parsedFeature = parsedFeature + sCurrentLine + "\n";
                         }
                     }

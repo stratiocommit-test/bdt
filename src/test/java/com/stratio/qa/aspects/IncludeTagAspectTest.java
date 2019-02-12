@@ -177,4 +177,50 @@ public class IncludeTagAspectTest {
         assertThat(lines.get(1)).as("Test that Scenario line was moved to first include line").isEqualTo("Scenario: Scenario with include");
         assertThat(lines).as("Test that array doesn't contains @include tag").doesNotContain("@include");
     }
+
+    @Test
+    public void testIncludeWithRunOnEnv() throws IncludeException {
+        String[] originalFeature = new String[]
+                {"Feature: Test",
+                 "@include(feature:runOnEnvTag.feature,scenario:RunOnEnv with param defined.)",
+                 "Scenario: Scenario with include",
+                 "Given I run 'echo 1' locally"};
+        List<String> lines = new ArrayList<>(Arrays.asList(originalFeature));
+        inctag.parseLines(lines, "src/test/resources/features/");
+        assertThat(lines.get(1)).as("Test that Scenario line was moved to include line").isEqualTo("Scenario: Scenario with include");
+        assertThat(lines.get(2)).as("Test that array doesn't contains @runOnEnv tag").doesNotContain("@runOnEnv");
+        assertThat(lines).as("Test that array doesn't contains @include tag").doesNotContain("@include");
+    }
+
+    @Test
+    public void testIncludeBeforeOtherTags() throws IncludeException {
+        String[] originalFeature = new String[]
+                {"Feature: Test",
+                 "@include(feature:logger.feature,scenario:Some simple request)",
+                 "@runOnEnv(TEST)",
+                 "Scenario: Scenario with include",
+                 "Given I run 'echo 1' locally"};
+        List<String> lines = new ArrayList<>(Arrays.asList(originalFeature));
+        inctag.parseLines(lines, "src/test/resources/features/");
+        assertThat(lines.get(1)).as("Test that runOnEnv tag was moved before Scenario").isEqualTo("@runOnEnv(TEST)");
+        assertThat(lines.get(2)).as("Test that Scenario line was moved after other scenario tags").isEqualTo("Scenario: Scenario with include");
+        assertThat(lines).as("Test that array doesn't contains @include tag").doesNotContain("@include");
+    }
+
+    @Test
+    public void testIncludeBeforeOtherTagsMultiple() throws IncludeException {
+        String[] originalFeature = new String[]
+                {"Feature: Test",
+                 "@include(feature:logger.feature,scenario:Some simple request)",
+                 "@runOnEnv(TEST)",
+                 "@ignore @manual",
+                 "Scenario: Scenario with include",
+                 "Given I run 'echo 1' locally"};
+        List<String> lines = new ArrayList<>(Arrays.asList(originalFeature));
+        inctag.parseLines(lines, "src/test/resources/features/");
+        assertThat(lines.get(1)).as("Test that runOnEnv tag was moved before Scenario").isEqualTo("@runOnEnv(TEST)");
+        assertThat(lines.get(2)).as("Test that ignore tag was moved before Scenario").isEqualTo("@ignore @manual");
+        assertThat(lines.get(3)).as("Test that Scenario line was moved after other scenario tags").isEqualTo("Scenario: Scenario with include");
+        assertThat(lines).as("Test that array doesn't contains @include tag").doesNotContain("@include");
+    }
 }
